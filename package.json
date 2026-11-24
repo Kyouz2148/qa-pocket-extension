@@ -1,0 +1,22 @@
+{
+  "name": "qa-pocket-extension",
+  "version": "1.0.0",
+  "description": "Extensão multi-navegador (Manifest V3) para QA: One-Click Bug Reporter (Markdown/Jira/Playwright) + Edge-Case Form Filler.",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node scripts/build-browsers.mjs",
+    "playground": "node playground/server.js"
+  },
+  "keywords": [
+    "qa",
+    "browser-extension",
+    "manifest-v3",
+    "bug-reporter",
+    "playwright",
+    "jira",
+    "form-filler",
+    "testing"
+  ],
+  "license": "MIT"
+}

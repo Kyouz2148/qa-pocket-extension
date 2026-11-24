@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QA Pocket</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="brand">
+        <img src="../../icons/icon48.png" alt="QA Pocket" class="brand-icon" />
+        <div>
+          <h1 class="brand-title">QA Pocket</h1>
+          <p class="brand-sub" id="tabHost">Carregando aba…</p>
+        </div>
+      </div>
+      <span class="status-pill" id="globalStatusPill">0 erros</span>
+    </header>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="reporter" role="tab" aria-selected="true">
+        🐛 Bug Reporter
+      </button>
+      <button class="tab-btn" data-tab="filler" role="tab" aria-selected="false">
+        🧪 Edge Form Filler
+      </button>
+    </nav>
+
+    <div class="banner-warn hidden" id="restrictedBanner">
+      <strong>Página restrita ou script não injetado.</strong>
+      <span>Recarregue a aba ou habilite “Permitir acesso a URLs de arquivo” para arquivos locais (<code>file://</code>).</span>
+    </div>
+
+    <!-- TAB 1: BUG REPORTER -->
+    <main class="tab-panel active" id="panel-reporter">
+      <section class="metrics-row">
+        <div class="metric-card metric-error">
+          <span class="metric-val" id="countConsoleErrors">0</span>
+          <span class="metric-lbl">Console Err</span>
+        </div>
+        <div class="metric-card metric-warn">
+          <span class="metric-val" id="countConsoleWarns">0</span>
+          <span class="metric-lbl">Warnings</span>
+        </div>
+        <div class="metric-card metric-net">
+          <span class="metric-val" id="countNetErrors">0</span>
+          <span class="metric-lbl">HTTP 4xx/5xx</span>
+        </div>
+        <div class="metric-card metric-steps">
+          <span class="metric-val" id="countBreadcrumbs">0</span>
+          <span class="metric-lbl">Passos</span>
+        </div>
+        <button class="btn-icon-clear" id="btnClearLogs" title="Limpar logs desta aba">
+          🗑️
+        </button>
+      </section>
+
+      <section class="card recent-events" id="recentEventsBox">
+        <div class="card-head">
+          <span>Evidências capturadas nesta aba</span>
+          <span class="muted" id="viewportBadge">-</span>
+        </div>
+        <ul class="events-list" id="eventsList">
+          <li class="empty-state">Nenhum erro capturado até o momento.</li>
+        </ul>
+      </section>
+
+      <section class="card form-inputs">
+        <input
+          type="text"
+          id="customTitle"
+          class="input-text"
+          placeholder="Título do bug (opcional — gerado automaticamente se vazio)"
+        />
+        <textarea
+          id="customNotes"
+          class="input-textarea"
+          rows="2"
+          placeholder="Observações do QA ou comportamento esperado (opcional)…"
+        ></textarea>
+
+        <div class="toggles-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="optIncludeWarnings" checked />
+            <span>Warnings</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="optIncludeBreadcrumbs" checked />
+            <span>Passos</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="optRedactTokens" checked />
+            <span>Mascarar tokens</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="screenshot-bar">
+        <button class="btn-secondary" id="btnCaptureScreenshot">📸 Capturar Tela</button>
+        <div class="screenshot-actions hidden" id="screenshotActions">
+          <img id="screenshotThumb" alt="Preview screenshot" class="screenshot-thumb" />
+          <button class="btn-mini" id="btnDownloadScreenshot" title="Baixar PNG">⬇️ PNG</button>
+          <button class="btn-mini" id="btnCopyScreenshot" title="Copiar imagem">📋 Imagem</button>
+        </div>
+      </section>
+
+      <section class="card output-card">
+        <div class="format-tabs" role="tablist">
+          <button class="fmt-btn active" data-format="markdown">Markdown (GitHub)</button>
+          <button class="fmt-btn" data-format="jira">Jira</button>
+          <button class="fmt-btn" data-format="playwright">Playwright (.spec.ts)</button>
+        </div>
+        <pre class="code-preview" id="reportPreview"></pre>
+        <div class="cta-row">
+          <button class="btn-primary" id="btnCopyReport">📋 Copiar Relatório</button>
+          <button class="btn-secondary" id="btnDownloadReport">💾 Baixar</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- TAB 2: EDGE-CASE FORM FILLER -->
+    <main class="tab-panel" id="panel-filler">
+      <div class="filler-summary">
+        <span id="formDetectionText">Analisando formulários da página…</span>
+        <label class="checkbox-label">
+          <input type="checkbox" id="optHighlightFields" checked />
+          <span>Destacar</span>
+        </label>
+      </div>
+
+      <section class="profiles-grid" id="profilesGrid"></section>
+
+      <div class="cta-row">
+        <button class="btn-primary btn-emerald" id="btnFillForms">⚡ Preencher Formulário Agora</button>
+        <button class="btn-secondary" id="btnClearForms">🧹 Limpar</button>
+      </div>
+
+      <section class="card quick-snippets">
+        <div class="card-head">
+          <span>Gerador Rápido (1 clique para copiar)</span>
+        </div>
+        <div class="snippets-grid" id="snippetsGrid"></div>
+      </section>
+    </main>
+
+    <div class="toast hidden" id="popupToast"></div>
+  </div>
+
+  <script src="../shared/webext.js"></script>
+  <script src="../shared/formatters.js"></script>
+  <script src="../shared/edge-data.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

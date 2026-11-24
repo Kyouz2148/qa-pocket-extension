@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "QA Pocket — Bug Reporter & Edge Filler",
+  "short_name": "QA Pocket",
+  "version": "1.0.0",
+  "description": "Captura erros de console e HTTP 4xx/5xx com 1 clique para Markdown, Jira ou Playwright e preenche formulários com dados de borda.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "QA Pocket — Bug Reporter & Edge Filler",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "scripts": [
+      "src/shared/webext.js",
+      "src/background/service-worker.js"
+    ]
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/page-interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "src/shared/webext.js",
+        "src/shared/edge-data.js",
+        "src/content/isolated-bridge.js"
+      ],
+      "run_at": "document_start",
+      "world": "ISOLATED",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/page-interceptor.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "qa-pocket@qapocket.dev",
+      "strict_min_version": "128.0"
+    }
+  }
+}
